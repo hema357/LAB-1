@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML5 Multimedia Player</title>
+    <style>
+        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; background: #f4f4f4; padding: 20px; }
+        .container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; max-width: 500px; }
+        section { margin-bottom: 30px; text-align: center; }
+        video { width: 100%; border-radius: 4px; background: #000; }
+        .controls { margin-top: 10px; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; align-items: center; }
+        .time-display { font-weight: bold; color: #555; min-width: 80px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <section>
+            <h2>🎵 Audio Player</h2>
+            <audio id="myAudio" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"></audio>
+            <div class="controls">
+                <button onclick="playMedia('myAudio')">Play</button>
+                <button onclick="pauseMedia('myAudio')">Pause</button>
+                <input type="range" min="0" max="1" step="0.1" onchange="setVolume('myAudio', this.value)"> Vol
+                <div class="time-display" id="myAudio-time">0:00</div>
+            </div>
+        </section>
+
+        <hr>
+
+        <section>
+            <h2>🎥 Video Player</h2>
+            <video id="myVideo" src="https://www.w3schools.com/html/mov_bbb.mp4"></video>
+            <div class="controls">
+                <button onclick="playMedia('myVideo')">Play</button>
+                <button onclick="pauseMedia('myVideo')">Pause</button>
+                <input type="range" min="0" max="1" step="0.1" onchange="setVolume('myVideo', this.value)"> Vol
+                <div class="time-display" id="myVideo-time">0:00</div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Function to play media
+        function playMedia(id) {
+            document.getElementById(id).play();
+        }
+
+        // Function to pause media
+        function pauseMedia(id) {
+            document.getElementById(id).pause();
+        }
+
+        // Function to adjust volume
+        function setVolume(id, vol) {
+            document.getElementById(id).volume = vol;
+        }
+
+        // Function to update time dynamically
+        function updateTime(mediaId) {
+            const media = document.getElementById(mediaId);
+            const display = document.getElementById(mediaId + '-time');
+            
+            media.addEventListener('timeupdate', () => {
+                let minutes = Math.floor(media.currentTime / 60);
+                let seconds = Math.floor(media.currentTime % 60);
+                display.innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+            });
+        }
+
+        // Initialize time trackers
+        updateTime('myAudio');
+        updateTime('myVideo');
+    </script>
+</body>
+</html>
