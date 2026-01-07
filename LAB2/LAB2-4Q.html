@@ -68,7 +68,6 @@
     const regForm = document.getElementById('regForm');
     const userList = document.getElementById('userList');
 
-    // Load table on page load
     document.addEventListener('DOMContentLoaded', displayUsers);
 
     regForm.addEventListener('submit', function(e) {
@@ -79,7 +78,6 @@
         const mobile = document.getElementById('userMobile').value;
         const pass = document.getElementById('userPass').value;
 
-        // Validations
         if (mobile.length !== 10 || isNaN(mobile)) {
             alert("Mobile number must be exactly 10 digits.");
             return;
@@ -91,7 +89,6 @@
 
         let users = JSON.parse(localStorage.getItem('users')) || [];
 
-        // Check for duplicate email
         if (users.some(user => user.email === email)) {
             alert("This email is already registered.");
             return;
@@ -137,3 +134,4 @@
 
 </body>
 </html>
+
