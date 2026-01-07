@@ -42,22 +42,18 @@
     </div>
 
     <script>
-        // Function to play media
         function playMedia(id) {
             document.getElementById(id).play();
         }
 
-        // Function to pause media
         function pauseMedia(id) {
             document.getElementById(id).pause();
         }
 
-        // Function to adjust volume
         function setVolume(id, vol) {
             document.getElementById(id).volume = vol;
         }
-
-        // Function to update time dynamically
+        
         function updateTime(mediaId) {
             const media = document.getElementById(mediaId);
             const display = document.getElementById(mediaId + '-time');
@@ -69,9 +65,9 @@
             });
         }
 
-        // Initialize time trackers
         updateTime('myAudio');
         updateTime('myVideo');
     </script>
 </body>
 </html>
+
