@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Intelligent Shopping Cart</title>
+    <style>
+        body { font-family: sans-serif; background: #f4f4f9; padding: 20px; display: flex; gap: 20px; }
+        .products, .cart { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .products { flex: 1; }
+        .cart { flex: 1.5; }
+        .item-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; }
+        .discount-badge { background: #e74c3c; color: white; font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; margin-left: 5px; }
+        .totals { margin-top: 20px; border-top: 2px solid #333; padding-top: 10px; }
+        .promo-section { margin-top: 15px; background: #f9f9f9; padding: 10px; border-radius: 4px; }
+        button { cursor: pointer; padding: 5px 10px; }
+        .add-btn { background: #2ecc71; color: white; border: none; border-radius: 3px; }
+    </style>
+</head>
+<body>
+
+<div class="products">
+    <h3>Store Items</h3>
+    <div id="store-list"></div>
+</div>
+
+<div class="cart">
+    <h3>Your Shopping Cart</h3>
+    <div id="cart-display">
+        <p>Cart is empty</p>
+    </div>
+    
+    <div class="promo-section">
+        <input type="text" id="couponInput" placeholder="Enter Coupon (e.g. SAVE10)">
+        <button onclick="applyCoupon()">Apply</button>
+        <small id="couponFeedback" style="display:block; margin-top:5px;"></small>
+    </div>
+
+    <div class="totals" id="totals-display"></div>
+</div>
+
+<script>
+    // 1. Product Data
+    const products = [
+        { id: 1, name: "Headphones", price: 100, category: "Electronics" },
+        { id: 2, name: "Coffee Mug", price: 15, category: "Home" },
+        { id: 3, name: "Smart Watch", price: 200, category: "Electronics" },
+        { id: 4, name: "Notebook", price: 5, category: "Stationery" }
+    ];
+
+    let cart = [];
+    let activeCoupon = "";
+
+    // 2. Initialize Store
+    function initStore() {
+        const list = document.getElementById('store-list');
+        list.innerHTML = products.map(p => `
+            <div class="item-row">
+                <span>${p.name} - $${p.price}</span>
+                <button class="add-btn" onclick="addToCart(${p.id})">Add to Cart</button>
+            </div>
+        `).join('');
+    }
+
+    // 3. Update Cart State
+    function addToCart(id) {
+        const product = products.find(p => p.id === id);
+        const cartItem = cart.find(item => item.id === id);
+
+        if (cartItem) {
+            cartItem.quantity++;
+        } else {
+            cart.push({ ...product, quantity: 1 });
+        }
+        renderCart();
+    }
+
+    function updateQty(id, delta) {
+        const item = cart.find(i => i.id === id);
+        item.quantity += delta;
+        if (item.quantity <= 0) {
+            cart = cart.filter(i => i.id !== id);
+        }
+        renderCart();
+    }
+
+    // 4. String Method Validation for Coupon
+    function applyCoupon() {
+        const input = document.getElementById('couponInput').value.trim().toUpperCase();
+        const feedback = document.getElementById('couponFeedback');
+        
+        // Example logic: must start with 'SAVE' and end with a number
+        if (input.startsWith("SAVE") && !isNaN(input.slice(4)) && input.length > 4) {
+            activeCoupon = input;
+            feedback.style.color = "green";
+            feedback.textContent = `Applied ${input.slice(4)}% off!`;
+        } else {
+            activeCoupon = "";
+            feedback.style.color = "red";
+            feedback.textContent = "Invalid Coupon Code.";
+        }
+        renderCart();
+    }
+
+    // 5. Calculate & Render (Core Logic)
+    function renderCart() {
+        const cartDiv = document.getElementById('cart-display');
+        const totalsDiv = document.getElementById('totals-display');
+
+        if (cart.length === 0) {
+            cartDiv.innerHTML = "<p>Cart is empty</p>";
+            totalsDiv.innerHTML = "";
+            return;
+        }
+
+        let subtotal = 0;
+        let totalDiscount = 0;
+
+        const cartHTML = cart.map(item => {
+            let itemTotal = item.price * item.quantity;
+            let itemDiscount = 0;
+
+            // Rule 1: Bulk Discount (10% off if qty > 5)
+            if (item.quantity > 5) {
+                itemDiscount += itemTotal * 0.10;
+            }
+
+            // Rule 2: Category Discount (15% off Electronics)
+            if (item.category === "Electronics") {
+                itemDiscount += (itemTotal - itemDiscount) * 0.15;
+            }
+
+            subtotal += itemTotal;
+            totalDiscount += itemDiscount;
+
+            return `
+                <div class="item-row">
+                    <div>
+                        <strong>${item.name}</strong> 
+                        ${itemDiscount > 0 ? '<span class="discount-badge">Discount Applied</span>' : ''}
+                        <br><small>$${item.price} each</small>
+                    </div>
+                    <div>
+                        <button onclick="updateQty(${item.id}, -1)">-</button>
+                        <span>${item.quantity}</span>
+                        <button onclick="updateQty(${item.id}, 1)">+</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        // Apply Coupon Discount on remaining total
+        let couponDeduction = 0;
+        if (activeCoupon) {
+            const percent = parseInt(activeCoupon.slice(4));
+            couponDeduction = (subtotal - totalDiscount) * (percent / 100);
+        }
+
+        const finalTotal = subtotal - totalDiscount - couponDeduction;
+
+        cartDiv.innerHTML = cartHTML;
+        totalsDiv.innerHTML = `
+            <p>Subtotal: $${subtotal.toFixed(2)}</p>
+            <p style="color: red;">Discounts: -$${(totalDiscount + couponDeduction).toFixed(2)}</p>
+            <h3>Total: $${finalTotal.toFixed(2)}</h3>
+        `;
+    }
+
+    initStore();
+</script>
+
+</body>
+</html>

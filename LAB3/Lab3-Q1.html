@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adaptive Registration System</title>
+    <style>
+        :root { --error: #e74c3c; --success: #2ecc71; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; display: flex; justify-content: center; padding: 20px; }
+        .card { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 450px; }
+        h2 { margin-top: 0; color: #1a73e8; text-align: center; }
+        .form-group { margin-bottom: 1rem; position: relative; }
+        label { display: block; font-size: 0.9rem; margin-bottom: 5px; font-weight: 600; color: #444; }
+        input, select { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 6px; box-sizing: border-box; transition: border-color 0.3s; }
+        
+        /* Requirement 5: Highlight invalid inputs */
+        input.invalid { border-color: var(--error); background-color: #fff5f5; }
+        .error-msg { color: var(--error); font-size: 0.8rem; margin-top: 4px; display: block; font-weight: 500; }
+        
+        button { width: 100%; padding: 14px; background: #1a73e8; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; font-weight: bold; margin-top: 10px; }
+        button:hover { background: #1557b0; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Create Account</h2>
+    <form id="regForm" novalidate>
+        <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" id="name" placeholder="Enter name">
+            <small class="error-msg"></small>
+        </div>
+
+        <div class="form-group">
+            <label>Email Address</label>
+            <input type="email" id="email" placeholder="name@domain.com">
+            <small class="error-msg"></small>
+        </div>
+
+        <div class="row" style="display: flex; gap: 10px;">
+            <div class="form-group" style="flex: 1;">
+                <label>Age</label>
+                <input type="number" id="age" placeholder="Min 18">
+                <small class="error-msg"></small>
+            </div>
+            <div class="form-group" style="flex: 1;">
+                <label>Role</label>
+                <select id="role">
+                    <option value="student">Student</option>
+                    <option value="teacher">Teacher</option>
+                    <option value="admin">Admin</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="skillsContainer" class="form-group">
+            <label>Skills</label>
+            <input type="text" id="skills" placeholder="e.g. HTML, CSS, JS">
+            <small class="error-msg"></small>
+        </div>
+
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="password" placeholder="Strength depends on role">
+            <small class="error-msg"></small>
+        </div>
+
+        <div class="form-group">
+            <label>Confirm Password</label>
+            <input type="password" id="confirmPassword">
+            <small class="error-msg"></small>
+        </div>
+
+        <button type="submit">Register Now</button>
+    </form>
+</div>
+
+<script>
+    const form = document.getElementById('regForm');
+    const roleSelect = document.getElementById('role');
+    const skillsContainer = document.getElementById('skillsContainer');
+
+    // Requirement 5: Manipulate DOM to show/hide fields
+    roleSelect.addEventListener('change', () => {
+        skillsContainer.style.display = roleSelect.value === 'admin' ? 'none' : 'block';
+        validateField(document.getElementById('password'));
+    });
+
+    // Requirement 2, 3 & 4: Dynamic Validation Functions
+    const validators = {
+        name: (val) => val.trim().length < 2 ? "Name is required." : "",
+        email: (val) => {
+            const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return regex.test(val) ? "" : "Invalid email domain.";
+        },
+        age: (val) => {
+            const num = parseInt(val);
+            if (!val) return "Age is required.";
+            return (num >= 18 && num <= 100) ? "" : "Must be between 18 and 100.";
+        },
+        password: (val) => {
+            if (val.length < 6) return "Min 6 characters required.";
+            
+            // Dynamic rule: Admin needs numbers and symbols
+            if (roleSelect.value === 'admin') {
+                const strongRegex = /^(?=.*[0-9])(?=.*[!@#$%^&*])/;
+                if (!strongRegex.test(val)) return "Admin: Add 1 number & 1 symbol.";
+            }
+            return "";
+        },
+        confirmPassword: (val) => {
+            const original = document.getElementById('password').value;
+            return val === original ? "" : "Passwords do not match.";
+        }
+    };
+
+    function validateField(input) {
+        if (!validators[input.id]) return true;
+
+        const errorMsg = validators[input.id](input.value);
+        const feedbackElement = input.parentElement.querySelector('.error-msg');
+        
+        // Requirement 4 & 5: Show dynamic feedback and highlight
+        if (errorMsg) {
+            input.classList.add('invalid');
+            feedbackElement.textContent = errorMsg;
+            return false;
+        } else {
+            input.classList.remove('invalid');
+            feedbackElement.textContent = "";
+            return true;
+        }
+    }
+
+    // Real-time listeners
+    form.addEventListener('input', (e) => validateField(e.target));
+
+    // Requirement 6: Prevent submission until valid
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        const inputs = Array.from(form.querySelectorAll('input, select'));
+        // Only validate visible inputs
+        const visibleInputs = inputs.filter(i => i.offsetParent !== null);
+        
+        const allValid = visibleInputs.every(input => validateField(input));
+
+        if (allValid) {
+            alert("✅ Validation Passed! Data ready for server.");
+            console.log("Form Data:", Object.fromEntries(new FormData(form)));
+        } else {
+            alert("❌ Please correct the highlighted errors.");
+        }
+    });
+</script>
+
+</body>
+</html>

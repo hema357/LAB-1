@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User Activity Monitor</title>
+    <style>
+        body { font-family: 'Courier New', monospace; background: #121212; color: #00ff00; padding: 20px; display: flex; gap: 20px; }
+        .interaction-zone { flex: 1; background: #1e1e1e; padding: 20px; border: 1px solid #333; border-radius: 8px; }
+        .log-container { flex: 1; background: #000; border: 1px solid #00ff00; border-radius: 8px; display: flex; flex-direction: column; height: 80vh; }
+        
+        #logList { flex-grow: 1; overflow-y: auto; padding: 10px; list-style: none; font-size: 0.85rem; }
+        .log-entry { border-bottom: 1px solid #222; padding: 5px 0; }
+        .warning { color: #ff3e3e; font-weight: bold; background: rgba(255,0,0,0.1); padding: 2px; }
+        
+        input, button { padding: 10px; margin: 10px 0; width: 100%; border-radius: 4px; border: none; }
+        button { background: #00ff00; color: black; cursor: pointer; font-weight: bold; }
+        button.reset { background: #ff3e3e; color: white; margin-top: auto; }
+        
+        .stats { font-size: 0.9rem; padding: 10px; border-top: 1px solid #00ff00; }
+    </style>
+</head>
+<body>
+
+<div class="interaction-zone">
+    <h2>Interactive Zone</h2>
+    <p>All interactions here are monitored.</p>
+    <input type="text" id="userInput" placeholder="Type something...">
+    <button id="actionBtn">Click Me Repeatedly</button>
+    <div style="margin-top:20px; padding:20px; border:1px dashed #555;">
+        Hover or Click inside this Box
+    </div>
+</div>
+
+<div class="log-container">
+    <div style="padding:10px; border-bottom:1px solid #00ff00;">Activity Log</div>
+    <ul id="logList"></ul>
+    <div class="stats" id="stats">Clicks: 0 | Keys: 0</div>
+    <button onclick="exportLog()">Export Log</button>
+    <button class="reset" onclick="resetLog()">Reset System</button>
+</div>
+
+<script>
+    // 1. Activity State
+    let activityLog = [];
+    const CLICK_THRESHOLD = 10; // Warning if > 10 clicks in session
+    let clickCount = 0;
+
+    const logList = document.getElementById('logList');
+    const statsDisplay = document.getElementById('stats');
+
+    // 2. Log Activity Function (Requirement 2 & 4)
+    function logActivity(type, target, details = "") {
+        const entry = {
+            timestamp: new Date().toLocaleTimeString(),
+            type: type,
+            element: target,
+            details: details
+        };
+        
+        activityLog.push(entry);
+        
+        // Update DOM
+        const li = document.createElement('li');
+        li.className = 'log-entry';
+        li.innerHTML = `[${entry.timestamp}] <span style="color:#aaa">${type.toUpperCase()}</span> on &lt;${target}&gt; ${details}`;
+        logList.prepend(li); // Show newest at top
+
+        updateStats(type);
+    }
+
+    // 3. Threshold Logic (Requirement 5)
+    function updateStats(type) {
+        if (type === 'click') clickCount++;
+        
+        if (clickCount > CLICK_THRESHOLD) {
+            const warning = document.createElement('li');
+            warning.className = 'log-entry warning';
+            warning.textContent = "⚠️ WARNING: Suspicious click activity detected!";
+            logList.prepend(warning);
+        }
+
+        const keyCount = activityLog.filter(a => a.type === 'keydown').length;
+        statsDisplay.textContent = `Clicks: ${clickCount} | Keys: ${keyCount}`;
+    }
+
+    // 4. Global Event Listeners (Requirement 1 & 3)
+
+    // CAPTURING Phase: Track focus/blur (these don't bubble, so we use capture)
+    window.addEventListener('focus', (e) => {
+        logActivity('focus', e.target.tagName || 'window');
+    }, true);
+
+    window.addEventListener('blur', (e) => {
+        logActivity('blur', e.target.tagName || 'window');
+    }, true);
+
+    // BUBBLING Phase: Track clicks and keys
+    document.addEventListener('click', (e) => {
+        logActivity('click', e.target.tagName, `ID: ${e.target.id || 'none'}`);
+    });
+
+    document.addEventListener('keydown', (e) => {
+        logActivity('keydown', 'input', `Key: ${e.key}`);
+    });
+
+    // 5. Reset & Export (Requirement 6)
+    function resetLog() {
+        activityLog = [];
+        clickCount = 0;
+        logList.innerHTML = "";
+        statsDisplay.textContent = "Clicks: 0 | Keys: 0";
+    }
+
+    function exportLog() {
+        if (activityLog.length === 0) return alert("Log is empty!");
+        
+        let text = "USER ACTIVITY LOG\n=================\n";
+        activityLog.forEach(a => {
+            text += `[${a.timestamp}] ${a.type.toUpperCase()} - Element: ${a.element} - ${a.details}\n`;
+        });
+
+        const blob = new Blob([text], { type: 'text/plain' });
+        const anchor = document.createElement('a');
+        anchor.download = "activity_log.txt";
+        anchor.href = (window.webkitURL || window.URL).createObjectURL(blob);
+        anchor.click();
+    }
+</script>
+
+</body>
+</html>
