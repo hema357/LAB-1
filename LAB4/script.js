@@ -1,42 +1,68 @@
-const usernameInput = document.getElementById("username");
-const statusDiv = document.getElementById("status");
-const loader = document.getElementById("loader");
-const form = document.getElementById("registerForm");
+const searchInput = document.getElementById("searchInput");
+const resultsDiv = document.getElementById("results");
 
-let isAvailable = false;
+let debounceTimer;
 
-usernameInput.addEventListener("keyup", function () {
-  const username = usernameInput.value.trim();
+function debounce(callback, delay) {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(callback, delay);
+}
 
-  if (username === "") {
-    statusDiv.innerHTML = "";
-    return;
-  }
+searchInput.addEventListener("input", function () {
 
-  loader.style.display = "inline";
-  statusDiv.innerHTML = "";
+    const query = searchInput.value.trim().toLowerCase();
 
-  fetch("users.json")
-    .then(response => response.json())
-    .then(data => {
-      loader.style.display = "none";
+    debounce(() => {
 
-      if (data.users.includes(username)) {
-        statusDiv.innerHTML = "Username already taken";
-        statusDiv.className = "taken";
-        isAvailable = false;
-      } else {
-        statusDiv.innerHTML = "Username available";
-        statusDiv.className = "available";
-        isAvailable = true;
-      }
+        if (query === "") {
+            resultsDiv.innerHTML = "";
+            return;
+        }
+
+        resultsDiv.innerHTML = "<p class='loading'>Searching...</p>";
+
+        fetch("products.json")
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Failed to fetch data");
+                }
+                return response.json();
+            })
+            .then(data => {
+
+                const filtered = data.products.filter(product =>
+                    product.name.toLowerCase().includes(query)
+                );
+
+                displayResults(filtered);
+            })
+            .catch(error => {
+                resultsDiv.innerHTML = "<p class='error'>⚠ Error loading products</p>";
+            });
+
+    }, 500);
+});
+
+function displayResults(products) {
+
+    resultsDiv.innerHTML = "";
+
+    if (products.length === 0) {
+        resultsDiv.innerHTML = "<p class='no-results'>No results found</p>";
+        return;
+    }
+
+    products.forEach(product => {
+        const card = document.createElement("div");
+        card.classList.add("product-card");
+
+        card.innerHTML = `
+            <h3>${product.name}</h3>
+            <p class="price">₹${product.price}</p>
+            <span class="category">${product.category}</span>
+        `;
+
+        resultsDiv.appendChild(card);
     });
-});
-
-form.addEventListener("submit", function (event) {
-  if (!isAvailable) {
-    event.preventDefault();
-    alert("Please choose a different username.");
-  }
-});
+}
 

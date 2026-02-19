@@ -1,0 +1,10 @@
+{
+  "products": [
+    { "name": "iPhone 15", "price": 80000, "category": "Electronics" },
+    { "name": "Samsung TV", "price": 45000, "category": "Electronics" },
+    { "name": "Nike Shoes", "price": 5000, "category": "Footwear" },
+    { "name": "Wooden Table", "price": 7000, "category": "Furniture" },
+    { "name": "Laptop", "price": 60000, "category": "Electronics" },
+    { "name": "Office Chair", "price": 8500, "category": "Furniture" }
+  ]
+}
