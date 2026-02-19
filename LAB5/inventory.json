@@ -1,0 +1,16 @@
+[
+  {
+    "id": 201,
+    "name": "Laptop",
+    "category": "Electronics",
+    "price": 55000,
+    "stock": 12
+  },
+  {
+    "id": 202,
+    "name": "Office Chair",
+    "category": "Furniture",
+    "price": 7500,
+    "stock": 4
+  }
+]

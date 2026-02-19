@@ -1,22 +1,26 @@
-let students = [];
+let products = [];
+let filteredProducts = [];
 
 // ================= INIT =================
 window.onload = function () {
-    loadStudents();
-    document.getElementById("addBtn").addEventListener("click", addStudent);
+    loadProducts();
+    document.getElementById("addBtn").addEventListener("click", addProduct);
+    document.getElementById("searchCategory").addEventListener("input", searchByCategory);
 };
 
-// ================= FETCH JSON =================
-function loadStudents() {
-    fetch("students.json")
-        .then(response => {
-            if (!response.ok) throw new Error("Fetch failed");
-            return response.json(); // ✅ required
+// ================= FETCH =================
+function loadProducts() {
+    fetch("inventory.json")
+        .then(res => {
+            if (!res.ok) throw new Error("Fetch failed");
+            return res.json();
         })
         .then(data => {
-            students = data;
-            displayStudents();
-            showMessage("Students loaded successfully.", "green");
+            products = data;
+            filteredProducts = [...products];
+            displayProducts();
+            updateTotalValue();
+            showMessage("Inventory loaded.", "green");
         })
         .catch(err => {
             showMessage("JSON loading/parsing error.", "red");
@@ -25,97 +29,127 @@ function loadStudents() {
 }
 
 // ================= DISPLAY =================
-function displayStudents() {
-    const table = document.getElementById("studentTable");
+function displayProducts() {
+    const table = document.getElementById("inventoryTable");
     table.innerHTML = "";
 
-    if (students.length === 0) {
-        showMessage("No student records.", "orange");
-        return;
-    }
+    filteredProducts.forEach((p, index) => {
+        const lowStockClass = p.stock <= 5 ? "low-stock" : "";
 
-    students.forEach((s, index) => {
         table.innerHTML += `
-        <tr>
-            <td>${s.id}</td>
-            <td>${s.name}</td>
-            <td>${s.course}</td>
-            <td>${s.marks}</td>
+        <tr class="${lowStockClass}">
+            <td>${p.id}</td>
+            <td>${p.name}</td>
+            <td>${p.category}</td>
+            <td>₹${p.price}</td>
+            <td>${p.stock}</td>
             <td>
-                <button class="action-btn edit" onclick="updateStudent(${index})">Update</button>
-                <button class="action-btn delete" onclick="deleteStudent(${index})">Delete</button>
+                <button class="action-btn edit" onclick="editProduct(${index})">Edit</button>
+                <button class="action-btn delete" onclick="deleteProduct(${index})">Delete</button>
             </td>
         </tr>`;
     });
+
+    updateTotalValue();
 }
 
 // ================= VALIDATION =================
-function validateInputs(id, name, course, marks) {
-    if (!id || !name || !course || !marks) {
-        showMessage("Please fill all fields.", "red");
+function validateInputs(id,name,cat,price,stock){
+    if(!id||!name||!cat||!price||!stock){
+        showMessage("Please fill all fields.","red");
+        return false;
+    }
+    if(price<0||stock<0){
+        showMessage("Invalid numeric values.","red");
         return false;
     }
     return true;
 }
 
-// ================= CREATE =================
-function addStudent() {
-    const id = document.getElementById("sid").value.trim();
-    const name = document.getElementById("sname").value.trim();
-    const course = document.getElementById("course").value.trim();
-    const marks = document.getElementById("marks").value.trim();
+// ================= ADD =================
+function addProduct(){
+    const id=pid.value.trim();
+    const name=pname.value.trim();
+    const cat=pcategory.value.trim();
+    const priceVal=price.value.trim();
+    const stockVal=stock.value.trim();
 
-    if (!validateInputs(id, name, course, marks)) return;
+    if(!validateInputs(id,name,cat,priceVal,stockVal)) return;
 
-    // duplicate check
-    if (students.some(s => s.id == id)) {
-        showMessage("Student ID already exists!", "red");
+    if(products.some(p=>p.id==id)){
+        showMessage("Product ID exists!","red");
         return;
     }
 
-    const newStudent = {
-        id: Number(id),
-        name: name,
-        course: course,
-        marks: Number(marks)
+    const newProduct={
+        id:Number(id),
+        name:name,
+        category:cat,
+        price:Number(priceVal),
+        stock:Number(stockVal)
     };
 
-    students.push(newStudent);
+    products.push(newProduct);
+    filteredProducts=[...products];
 
-    displayStudents();
+    displayProducts();
     clearForm();
-    showMessage("Student added successfully (temporary).", "green");
+    showMessage("Product added (temporary).","green");
 }
 
-// ================= UPDATE =================
-function updateStudent(index) {
-    const newCourse = prompt("Enter new course:");
-    const newMarks = prompt("Enter new marks:");
+// ================= EDIT =================
+function editProduct(index){
+    const p=filteredProducts[index];
 
-    if (newCourse) students[index].course = newCourse;
-    if (newMarks) students[index].marks = Number(newMarks);
+    const newPrice=prompt("Enter new price:",p.price);
+    const newStock=prompt("Enter new stock:",p.stock);
 
-    displayStudents();
-    showMessage("Student updated.", "blue");
+    if(newPrice!==null) p.price=Number(newPrice);
+    if(newStock!==null) p.stock=Number(newStock);
+
+    displayProducts();
+    showMessage("Product updated.","blue");
 }
 
 // ================= DELETE =================
-function deleteStudent(index) {
-    students.splice(index, 1);
-    displayStudents();
-    showMessage("Student deleted.", "red");
+function deleteProduct(index){
+    const id=filteredProducts[index].id;
+    products=products.filter(p=>p.id!==id);
+    filteredProducts=[...products];
+
+    displayProducts();
+    showMessage("Product deleted.","red");
+}
+
+// ================= SEARCH =================
+function searchByCategory(){
+    const key=searchCategory.value.toLowerCase();
+
+    filteredProducts=products.filter(p=>
+        p.category.toLowerCase().includes(key)
+    );
+
+    displayProducts();
+}
+
+// ================= TOTAL VALUE =================
+function updateTotalValue(){
+    const total=filteredProducts.reduce((sum,p)=>sum+p.price*p.stock,0);
+    document.getElementById("totalValue").textContent=
+        "Total Value: ₹"+total.toLocaleString();
 }
 
 // ================= UTIL =================
-function clearForm() {
-    document.getElementById("sid").value = "";
-    document.getElementById("sname").value = "";
-    document.getElementById("course").value = "";
-    document.getElementById("marks").value = "";
+function clearForm(){
+    pid.value="";
+    pname.value="";
+    pcategory.value="";
+    price.value="";
+    stock.value="";
 }
 
-function showMessage(msg, color) {
-    const m = document.getElementById("message");
-    m.style.color = color;
-    m.textContent = msg;
+function showMessage(msg,color){
+    const m=document.getElementById("message");
+    m.style.color=color;
+    m.textContent=msg;
 }

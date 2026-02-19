@@ -2,23 +2,29 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Student Record System</title>
+<title>Product Inventory System</title>
 <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
 <div class="container">
-    <h1>🎓 Student Record System</h1>
+    <h1>📦 Product Inventory System</h1>
 
     <div id="message"></div>
 
+    <div class="top-bar">
+        <input type="text" id="searchCategory" placeholder="Search by Category">
+        <div id="totalValue">Total Value: ₹0</div>
+    </div>
+
     <form onsubmit="return false;">
-        <input type="number" id="sid" placeholder="Student ID">
-        <input type="text" id="sname" placeholder="Name">
-        <input type="text" id="course" placeholder="Course">
-        <input type="number" id="marks" placeholder="Marks">
-        <button type="button" id="addBtn">Add Student</button>
+        <input type="number" id="pid" placeholder="Product ID">
+        <input type="text" id="pname" placeholder="Name">
+        <input type="text" id="pcategory" placeholder="Category">
+        <input type="number" id="price" placeholder="Price">
+        <input type="number" id="stock" placeholder="Stock">
+        <button type="button" id="addBtn">Add Product</button>
     </form>
 
     <table>
@@ -26,12 +32,13 @@
             <tr>
                 <th>ID</th>
                 <th>Name</th>
-                <th>Course</th>
-                <th>Marks</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Stock</th>
                 <th>Actions</th>
             </tr>
         </thead>
-        <tbody id="studentTable"></tbody>
+        <tbody id="inventoryTable"></tbody>
     </table>
 </div>
 
