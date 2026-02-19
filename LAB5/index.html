@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Employee Management System</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body onload="loadEmployees()">
+
+<div class="container">
+    <h1>Employee Management System</h1>
+
+    <div id="message"></div>
+
+    <form id="empForm">
+        <input type="text" id="empId" placeholder="Employee ID" required>
+        <input type="text" id="empName" placeholder="Name" required>
+        <input type="text" id="empDept" placeholder="Department" required>
+        <input type="number" id="empSalary" placeholder="Salary" required>
+        <button type="button" onclick="addEmployee()">Add Employee</button>
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Department</th>
+                <th>Salary</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="empTable"></tbody>
+    </table>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
