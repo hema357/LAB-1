@@ -1,119 +1,142 @@
-let xmlDoc = null;
+let xmlDoc;
 
-function loadEmployees() {
+// Load XML using AJAX
+function loadXML() {
     const xhr = new XMLHttpRequest();
-
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4) {
-            if (xhr.status === 200) {
-                xmlDoc = xhr.responseXML;
-
-                if (!xmlDoc) {
-                    showMessage("Malformed XML!", "red");
-                    return;
-                }
-
-                displayEmployees();
-            } else {
-                showMessage("Error loading XML file.", "red");
-            }
+    xhr.open("GET", "books.xml", true);
+    xhr.onload = function () {
+        if (this.status === 200) {
+            xmlDoc = this.responseXML;
+            displayBooks();
         }
     };
-
-    xhr.open("GET", "employees.xml", true);
     xhr.send();
 }
 
-function displayEmployees() {
-    const table = document.getElementById("empTable");
-    table.innerHTML = "";
+// Display books in table
+function displayBooks() {
+    const tableBody = document.querySelector("#bookTable tbody");
+    tableBody.innerHTML = "";
 
-    const employees = xmlDoc.getElementsByTagName("employee");
+    const books = xmlDoc.getElementsByTagName("book");
 
-    if (employees.length === 0) {
-        showMessage("No employee records found.", "orange");
-        return;
-    }
-
-    for (let i = 0; i < employees.length; i++) {
-        const emp = employees[i];
-
-        const id = emp.getElementsByTagName("id")[0].textContent;
-        const name = emp.getElementsByTagName("name")[0].textContent;
-        const dept = emp.getElementsByTagName("department")[0].textContent;
-        const salary = emp.getElementsByTagName("salary")[0].textContent;
+    for (let i = 0; i < books.length; i++) {
+        const id = books[i].getElementsByTagName("id")[0].textContent;
+        const title = books[i].getElementsByTagName("title")[0].textContent;
+        const author = books[i].getElementsByTagName("author")[0].textContent;
+        const availability = books[i].getElementsByTagName("availability")[0].textContent;
 
         const row = `
             <tr>
                 <td>${id}</td>
-                <td>${name}</td>
-                <td>${dept}</td>
-                <td>${salary}</td>
-                <td>
-                    <button class="action-btn edit" onclick="editEmployee(${i})">Edit</button>
-                    <button class="action-btn delete" onclick="deleteEmployee(${i})">Delete</button>
-                </td>
+                <td>${title}</td>
+                <td>${author}</td>
+                <td>${availability}</td>
             </tr>
         `;
-        table.innerHTML += row;
+        tableBody.innerHTML += row;
+    }
+}
+
+// Validation
+function validateFields(id, title, author, availability) {
+    if (!id || !title || !author || !availability) {
+        alert("All fields are required!");
+        return false;
+    }
+    return true;
+}
+
+// Add Book
+function addBook() {
+    const id = document.getElementById("bookId").value;
+    const title = document.getElementById("title").value;
+    const author = document.getElementById("author").value;
+    const availability = document.getElementById("availability").value;
+
+    if (!validateFields(id, title, author, availability)) return;
+
+    const books = xmlDoc.getElementsByTagName("book");
+
+    // Check duplicate ID
+    for (let i = 0; i < books.length; i++) {
+        if (books[i].getElementsByTagName("id")[0].textContent === id) {
+            alert("Book ID already exists!");
+            return;
+        }
     }
 
-    showMessage("Employees loaded successfully.", "green");
+    const newBook = xmlDoc.createElement("book");
+
+    const idNode = xmlDoc.createElement("id");
+    idNode.textContent = id;
+
+    const titleNode = xmlDoc.createElement("title");
+    titleNode.textContent = title;
+
+    const authorNode = xmlDoc.createElement("author");
+    authorNode.textContent = author;
+
+    const availabilityNode = xmlDoc.createElement("availability");
+    availabilityNode.textContent = availability;
+
+    newBook.appendChild(idNode);
+    newBook.appendChild(titleNode);
+    newBook.appendChild(authorNode);
+    newBook.appendChild(availabilityNode);
+
+    xmlDoc.documentElement.appendChild(newBook);
+
+    displayBooks();
+    alert("Book added successfully!");
 }
 
-function addEmployee() {
-    if (!xmlDoc) return;
+// Update Book
+function updateBook() {
+    const id = document.getElementById("bookId").value;
+    const availability = document.getElementById("availability").value;
 
-    const id = document.getElementById("empId").value;
-    const name = document.getElementById("empName").value;
-    const dept = document.getElementById("empDept").value;
-    const salary = document.getElementById("empSalary").value;
+    if (!id || !availability) {
+        alert("Enter Book ID and Availability!");
+        return;
+    }
 
-    const newEmp = xmlDoc.createElement("employee");
+    const books = xmlDoc.getElementsByTagName("book");
 
-    newEmp.appendChild(createNode("id", id));
-    newEmp.appendChild(createNode("name", name));
-    newEmp.appendChild(createNode("department", dept));
-    newEmp.appendChild(createNode("salary", salary));
+    for (let i = 0; i < books.length; i++) {
+        if (books[i].getElementsByTagName("id")[0].textContent === id) {
+            books[i].getElementsByTagName("availability")[0].textContent = availability;
+            displayBooks();
+            alert("Book updated successfully!");
+            return;
+        }
+    }
 
-    xmlDoc.documentElement.appendChild(newEmp);
-
-    displayEmployees();
-    showMessage("Employee added (local only).", "green");
+    alert("Book ID not found!");
 }
 
-function createNode(tag, value) {
-    const node = xmlDoc.createElement(tag);
-    node.appendChild(xmlDoc.createTextNode(value));
-    return node;
+// Delete Book
+function deleteBook() {
+    const id = document.getElementById("bookId").value;
+
+    if (!id) {
+        alert("Enter Book ID!");
+        return;
+    }
+
+    const books = xmlDoc.getElementsByTagName("book");
+
+    for (let i = 0; i < books.length; i++) {
+        if (books[i].getElementsByTagName("id")[0].textContent === id) {
+            xmlDoc.documentElement.removeChild(books[i]);
+            displayBooks();
+            alert("Book deleted successfully!");
+            return;
+        }
+    }
+
+    alert("Book ID not found!");
 }
 
-function editEmployee(index) {
-    const emp = xmlDoc.getElementsByTagName("employee")[index];
-
-    const newDept = prompt("Enter new department:");
-    const newSalary = prompt("Enter new salary:");
-
-    if (newDept)
-        emp.getElementsByTagName("department")[0].textContent = newDept;
-
-    if (newSalary)
-        emp.getElementsByTagName("salary")[0].textContent = newSalary;
-
-    displayEmployees();
-    showMessage("Employee updated.", "blue");
-}
-
-function deleteEmployee(index) {
-    const emp = xmlDoc.getElementsByTagName("employee")[index];
-    emp.parentNode.removeChild(emp);
-
-    displayEmployees();
-    showMessage("Employee deleted.", "red");
-}
-
-function showMessage(msg, color) {
-    const m = document.getElementById("message");
-    m.style.color = color;
-    m.textContent = msg;
-}
+// Load XML on page load
+window.onload = loadXML;
