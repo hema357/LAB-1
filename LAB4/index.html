@@ -1,22 +1,37 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Live Product Search</title>
+    <title>Student Management </title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="container">
-    <h1>🔍 Live Product Search</h1>
+<h2>Student Management System </h2>
 
-    <div class="search-box">
-        <input type="text" id="searchInput" placeholder="Search products...">
-    </div>
+<form id="studentForm">
+    <input type="text" id="studentId" placeholder="Student ID" required>
+    <input type="text" id="name" placeholder="Name" required>
+    <input type="text" id="department" placeholder="Department" required>
+    <input type="number" id="marks" placeholder="Marks" required>
 
-    <div id="results" class="results"></div>
-</div>
+    <button type="submit">Add / Update</button>
+</form>
+
+<p id="message"></p>
+
+<table border="1">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Department</th>
+            <th>Marks</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody id="studentTable"></tbody>
+</table>
 
 <script src="script.js"></script>
 </body>
 </html>
-
