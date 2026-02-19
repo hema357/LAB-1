@@ -1,36 +1,31 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Student Management </title>
+    <meta charset="UTF-8">
+    <title>Weather Dashboard</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<h2>Student Management System </h2>
+<div class="container">
+    <h1>🌤 Weather Dashboard</h1>
 
-<form id="studentForm">
-    <input type="text" id="studentId" placeholder="Student ID" required>
-    <input type="text" id="name" placeholder="Name" required>
-    <input type="text" id="department" placeholder="Department" required>
-    <input type="number" id="marks" placeholder="Marks" required>
+    <div class="search-box">
+        <input type="text" id="cityInput" placeholder="Enter city name">
+        <button id="searchBtn">Search</button>
+    </div>
 
-    <button type="submit">Add / Update</button>
-</form>
+    <div id="loading" class="loading">Loading...</div>
 
-<p id="message"></p>
+    <div id="error" class="error"></div>
 
-<table border="1">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Department</th>
-            <th>Marks</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody id="studentTable"></tbody>
-</table>
+    <div id="weatherResult" class="weather-result">
+        <h2 id="cityName"></h2>
+        <p id="temperature"></p>
+        <p id="humidity"></p>
+        <p id="condition"></p>
+    </div>
+</div>
 
 <script src="script.js"></script>
 </body>

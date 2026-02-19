@@ -1,106 +1,68 @@
-const form = document.getElementById("studentForm");
-const table = document.getElementById("studentTable");
-const message = document.getElementById("message");
+const cityInput = document.getElementById("cityInput");
+const searchBtn = document.getElementById("searchBtn");
+const loading = document.getElementById("loading");
+const errorDiv = document.getElementById("error");
+const weatherResult = document.getElementById("weatherResult");
 
-let students = [];
+const cityName = document.getElementById("cityName");
+const temperature = document.getElementById("temperature");
+const humidity = document.getElementById("humidity");
+const condition = document.getElementById("condition");
 
-// READ (Fetch students)
-function loadStudents() {
-    fetch("students.json")
-        .then(response => {
-            if (!response.ok) throw new Error("500");
-            return response.json();
-        })
-        .then(data => {
-            students = data.students;
-            renderTable();
-            showMessage("Students loaded (200 OK)", "success");
-        })
-        .catch(() => {
-            showMessage("Server Error (500)", "error");
-        });
-}
+let cachedWeather = null; 
 
-// Render table
-function renderTable() {
-    table.innerHTML = "";
-    students.forEach(student => {
-        table.innerHTML += `
-            <tr>
-                <td>${student.id}</td>
-                <td>${student.name}</td>
-                <td>${student.department}</td>
-                <td>${student.marks}</td>
-                <td>
-                    <button onclick="editStudent('${student.id}')">Edit</button>
-                    <button onclick="deleteStudent('${student.id}')">Delete</button>
-                </td>
-            </tr>
-        `;
-    });
-}
+const apiKey = "a7c588774f1b4dabf672490f4a9833f2";  
 
-// CREATE / UPDATE
-form.addEventListener("submit", function(e) {
-    e.preventDefault();
+async function fetchWeather(city) {
 
-    const id = document.getElementById("studentId").value;
-    const name = document.getElementById("name").value;
-    const department = document.getElementById("department").value;
-    const marks = document.getElementById("marks").value;
+    const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
 
-    const existing = students.find(s => s.id === id);
+    loading.style.display = "block";
+    weatherResult.style.display = "none";
+    errorDiv.textContent = "";
 
-    if (existing) {
-        // UPDATE
-        existing.name = name;
-        existing.department = department;
-        existing.marks = marks;
-        showMessage("Student Updated (200 OK)", "success");
-    } else {
-        // CREATE
-        students.push({ id, name, department, marks });
-        showMessage("Student Added (200 OK)", "success");
+    try {
+        const response = await fetch(url);  
+
+        if (!response.ok) {
+            if (response.status === 404) {
+                throw new Error("City not found (404)");
+            }
+            if (response.status === 401) {
+                throw new Error("Invalid API key (401)");
+            }
+            throw new Error("Server error");
+        }
+
+        const data = await response.json();  
+
+        
+        cityName.textContent = data.name + ", " + data.sys.country;
+        temperature.textContent = "Temperature: " + data.main.temp + " °C";
+        humidity.textContent = "Humidity: " + data.main.humidity + " %";
+        condition.textContent = "Condition: " + data.weather[0].description;
+
+        weatherResult.style.display = "block";
+
+        
+        cachedWeather = data;
+
+    } catch (err) {
+        errorDiv.textContent = err.message;
+    } finally {
+        loading.style.display = "none";
     }
+}
 
-    renderTable();
-    form.reset();
+searchBtn.addEventListener("click", () => {
+    const city = cityInput.value.trim();
+    if (city !== "") {
+        fetchWeather(city);
+    }
 });
 
-// DELETE
-function deleteStudent(id) {
-    const index = students.findIndex(s => s.id === id);
-
-    if (index === -1) {
-        showMessage("Student Not Found (404)", "error");
-        return;
+cityInput.addEventListener("keypress", function(e){
+    if(e.key === "Enter"){
+        searchBtn.click();
     }
-
-    students.splice(index, 1);
-    renderTable();
-    showMessage("Student Deleted (200 OK)", "success");
-}
-
-// EDIT
-function editStudent(id) {
-    const student = students.find(s => s.id === id);
-
-    if (!student) {
-        showMessage("Student Not Found (404)", "error");
-        return;
-    }
-
-    document.getElementById("studentId").value = student.id;
-    document.getElementById("name").value = student.name;
-    document.getElementById("department").value = student.department;
-    document.getElementById("marks").value = student.marks;
-}
-
-// Message
-function showMessage(text, type) {
-    message.textContent = text;
-    message.className = type;
-}
-
-// Initialize
-loadStudents();
+});
