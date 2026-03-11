@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Online Book Finder</title>
+
+<style>
+
+body{
+font-family:Arial;
+background:linear-gradient(to right,#58f97b,#6bccf3);
+padding:40px;
+color:white;
+}
+
+.container{
+background:white;
+color:black;
+padding:20px;
+border-radius:10px;
+width:700px;
+margin:auto;
+}
+
+h2{
+text-align:center;
+}
+
+input,select{
+padding:8px;
+margin:5px;
+}
+
+button{
+padding:8px 12px;
+background:#007bff;
+color:white;
+border:none;
+border-radius:5px;
+cursor:pointer;
+}
+
+.book{
+background:#f4f4f4;
+padding:10px;
+margin:10px 0;
+border-radius:5px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>📚 Online Book Finder</h2>
+
+<!-- Search -->
+<input type="text" id="searchTitle" placeholder="Search by title">
+<button onclick="searchBooks()">Search</button>
+
+<br>
+
+<!-- Filter -->
+<select id="categoryFilter" onchange="filterCategory()">
+<option value="">Filter by Category</option>
+<option value="Programming">Programming</option>
+<option value="Database">Database</option>
+<option value="Networking">Networking</option>
+</select>
+
+<!-- Sort -->
+<button onclick="sortPrice()">Sort by Price</button>
+<button onclick="sortRating()">Sort by Rating</button>
+
+<!-- Top Rated -->
+<button onclick="topRated()">Top Rated</button>
+
+<hr>
+
+<div id="books"></div>
+
+<button onclick="loadMore()">Load More</button>
+
+</div>
+
+<script>
+
+let books=[
+
+{title:"JavaScript Essentials",author:"John Smith",category:"Programming",price:450,rating:4.5,year:2023},
+
+{title:"MongoDB Guide",author:"David Lee",category:"Database",price:500,rating:4.2,year:2022},
+
+{title:"Python Programming",author:"Mark Brown",category:"Programming",price:400,rating:4.8,year:2024},
+
+{title:"Computer Networks",author:"Andrew Tanenbaum",category:"Networking",price:650,rating:4.1,year:2021},
+
+{title:"NodeJS Basics",author:"Ryan Dahl",category:"Programming",price:350,rating:4.0,year:2023},
+
+{title:"SQL Mastery",author:"Alice Green",category:"Database",price:300,rating:3.9,year:2020},
+
+{title:"Advanced MongoDB",author:"James Clark",category:"Database",price:550,rating:4.6,year:2024},
+
+{title:"Java Fundamentals",author:"Robert Martin",category:"Programming",price:480,rating:4.3,year:2022},
+
+{title:"Network Security",author:"William Stallings",category:"Networking",price:700,rating:4.7,year:2023},
+
+{title:"C Programming",author:"Dennis Ritchie",category:"Programming",price:420,rating:4.4,year:2019}
+
+]
+
+let displayCount=5
+
+function displayBooks(data){
+
+let container=document.getElementById("books")
+container.innerHTML=""
+
+data.slice(0,displayCount).forEach(book=>{
+
+container.innerHTML+=`
+
+<div class="book">
+
+<b>${book.title}</b><br>
+Author: ${book.author}<br>
+Category: ${book.category}<br>
+Price: ₹${book.price}<br>
+Rating: ${book.rating}<br>
+Year: ${book.year}
+
+</div>
+
+`
+
+})
+
+}
+
+function searchBooks(){
+
+let title=document.getElementById("searchTitle").value.toLowerCase()
+
+let result=books.filter(book=>book.title.toLowerCase().includes(title))
+
+displayBooks(result)
+
+}
+
+function filterCategory(){
+
+let cat=document.getElementById("categoryFilter").value
+
+let result=books.filter(book=>book.category==cat)
+
+displayBooks(result)
+
+}
+
+function sortPrice(){
+
+let sorted=[...books].sort((a,b)=>a.price-b.price)
+
+displayBooks(sorted)
+
+}
+
+function sortRating(){
+
+let sorted=[...books].sort((a,b)=>b.rating-a.rating)
+
+displayBooks(sorted)
+
+}
+
+function topRated(){
+
+let result=books.filter(book=>book.rating>=4)
+
+displayBooks(result)
+
+}
+
+function loadMore(){
+
+displayCount+=5
+
+displayBooks(books)
+
+}
+
+displayBooks(books)
+
+</script>
+
+</body>
+</html>
+
