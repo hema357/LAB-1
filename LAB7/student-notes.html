@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Student Notes Manager</title>
+
+<style>
+
+body{
+font-family: Arial;
+background: linear-gradient(to right,#4facfe,#00f2fe);
+padding:40px;
+}
+
+.container{
+background:white;
+padding:30px;
+border-radius:10px;
+width:500px;
+margin:auto;
+box-shadow:0 0 10px rgba(0,0,0,0.2);
+}
+
+h2{
+text-align:center;
+color:#333;
+}
+
+input,textarea{
+width:100%;
+padding:10px;
+margin:8px 0;
+border-radius:5px;
+border:1px solid #ccc;
+}
+
+button{
+padding:10px 15px;
+border:none;
+border-radius:5px;
+cursor:pointer;
+margin-top:5px;
+}
+
+.add-btn{
+background:#28a745;
+color:white;
+}
+
+.delete-btn{
+background:#dc3545;
+color:white;
+}
+
+.edit-btn{
+background:#007bff;
+color:white;
+}
+
+.note{
+background:#f9f9f9;
+padding:10px;
+margin-top:10px;
+border-radius:5px;
+border-left:5px solid #007bff;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>📚 Student Notes Manager</h2>
+
+<h3>Add Note</h3>
+
+<input type="text" id="title" placeholder="Enter Title">
+
+<input type="text" id="subject" placeholder="Enter Subject">
+
+<textarea id="description" placeholder="Enter Description"></textarea>
+
+<button class="add-btn" onclick="addNote()">Add Note</button>
+
+<hr>
+
+<h3>All Notes</h3>
+
+<div id="notes"></div>
+
+</div>
+
+<script>
+
+let notes = JSON.parse(localStorage.getItem("notes")) || [];
+
+function addNote(){
+
+const title=document.getElementById("title").value
+const subject=document.getElementById("subject").value
+const description=document.getElementById("description").value
+
+if(title=="" || subject=="" || description==""){
+alert("Please fill all fields")
+return
+}
+
+const note={
+id:Date.now(),
+title:title,
+subject:subject,
+description:description
+}
+
+notes.push(note)
+
+localStorage.setItem("notes",JSON.stringify(notes))
+
+document.getElementById("title").value=""
+document.getElementById("subject").value=""
+document.getElementById("description").value=""
+
+loadNotes()
+
+}
+
+function loadNotes(){
+
+let notesDiv=document.getElementById("notes")
+
+notesDiv.innerHTML=""
+
+notes.forEach(note=>{
+
+notesDiv.innerHTML+=`
+
+<div class="note">
+
+<b>${note.title}</b><br>
+Subject: ${note.subject}<br>
+Description: ${note.description}<br><br>
+
+<button class="edit-btn"
+onclick="editNote(${note.id})">Edit</button>
+
+<button class="delete-btn"
+onclick="deleteNote(${note.id})">Delete</button>
+
+</div>
+
+`
+
+})
+
+}
+
+function deleteNote(id){
+
+notes=notes.filter(note=>note.id!==id)
+
+localStorage.setItem("notes",JSON.stringify(notes))
+
+loadNotes()
+
+}
+
+function editNote(id){
+
+let note=notes.find(n=>n.id===id)
+
+let newTitle=prompt("Edit Title",note.title)
+let newDesc=prompt("Edit Description",note.description)
+
+if(newTitle!=null && newDesc!=null){
+
+note.title=newTitle
+note.description=newDesc
+
+localStorage.setItem("notes",JSON.stringify(notes))
+
+loadNotes()
+
+}
+
+}
+
+loadNotes()
+
+</script>
+
+</body>
+</html>
