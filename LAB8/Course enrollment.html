@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Course Enrollment</title>
+
+<style>
+
+body{
+    margin:0;
+    font-family: Arial;
+    background: linear-gradient(135deg,#43cea2,#185a9d);
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.container{
+    background:white;
+    padding:35px;
+    border-radius:20px;
+    box-shadow:0 20px 40px rgba(0,0,0,0.3);
+    text-align:center;
+    width:340px;
+}
+
+h2{
+    color:#185a9d;
+}
+
+input{
+    width:100%;
+    padding:10px;
+    margin:8px 0;
+    border-radius:10px;
+    border:1px solid #ccc;
+    font-size:15px;
+}
+
+button{
+    padding:12px 25px;
+    border:none;
+    border-radius:30px;
+    background: linear-gradient(to right,#ff7e5f,#feb47b);
+    color:white;
+    font-size:16px;
+    cursor:pointer;
+    margin-top:10px;
+    transition:0.3s;
+}
+
+button:hover{
+    transform:scale(1.1);
+}
+
+#result{
+    margin-top:20px;
+    background:#f1f1f1;
+    padding:15px;
+    border-radius:12px;
+    font-weight:bold;
+    word-wrap: break-word;
+}
+
+.success{
+    color:green;
+}
+
+.fail{
+    color:red;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>Course Enrollment</h2>
+
+<input type="text" id="course" placeholder="Enter Course Name">
+<input type="text" id="instructor" placeholder="Enter Instructor Name">
+<input type="number" id="seats" placeholder="Enter Available Seats">
+
+<button onclick="enroll()">Enroll</button>
+
+<div id="result"></div>
+
+</div>
+
+<script>
+
+class Course{
+    constructor(courseName, instructor){
+        this.courseName = courseName;
+        this.instructor = instructor;
+    }
+
+    displayCourse(){
+        return `Course: ${this.courseName} <br> Instructor: ${this.instructor}`;
+    }
+}
+
+function enroll(){
+
+    let cname = document.getElementById("course").value;
+    let inst = document.getElementById("instructor").value;
+    let seats = Number(document.getElementById("seats").value);
+
+    let course1 = new Course(cname, inst);
+
+    let enrollCourse = new Promise((resolve,reject)=>{
+        if(seats > 0)
+            resolve("Enrollment Successful ");
+        else
+            reject("Course Full ");
+    });
+
+    enrollCourse
+    .then(msg=>{
+        document.getElementById("result").innerHTML =
+        `${course1.displayCourse()} <br><br>
+         <span class="success">${msg}</span>`;
+    })
+    .catch(err=>{
+        document.getElementById("result").innerHTML =
+        `${course1.displayCourse()} <br><br>
+         <span class="fail">${err}</span>`;
+    });
+
+}
+
+</script>
+
+</body>
+</html>
+

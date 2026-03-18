@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Marks Calculator</title>
+
+<style>
+
+body{
+    margin:0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg,#9e5d83);
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+/* Glass Card */
+.container{
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(15px);
+    padding:40px;
+    border-radius:20px;
+    box-shadow:0 20px 40px rgba(0,0,0,0.3);
+    text-align:center;
+    width:320px;
+    animation: pop 0.6s ease;
+}
+
+@keyframes pop{
+    from{transform:scale(0.7);opacity:0;}
+    to{transform:scale(1);opacity:1;}
+}
+
+h2{
+    color:white;
+    letter-spacing:1px;
+}
+
+input{
+    width:100%;
+    padding:10px;
+    margin:8px 0;
+    border:none;
+    border-radius:10px;
+    outline:none;
+    font-size:15px;
+    transition:0.3s;
+}
+
+input:focus{
+    box-shadow:0 0 10px #00eaff;
+    transform:scale(1.05);
+}
+
+/* Gradient Button */
+button{
+    margin-top:15px;
+    padding:12px 25px;
+    border:none;
+    border-radius:30px;
+    background: linear-gradient(to right,#4bb95e);
+    color:white;
+    font-size:16px;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+button:hover{
+    transform:scale(1.1);
+    box-shadow:0 0 15px #88c7f1;
+}
+
+/* Result Box */
+#result{
+    margin-top:20px;
+    background:rgb(245, 243, 243);
+    padding:15px;
+    border-radius:12px;
+    font-weight:bold;
+    color:#333;
+    animation: fade 0.5s ease;
+}
+
+@keyframes fade{
+    from{opacity:0;}
+    to{opacity:1;}
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>Marks Calculator</h2>
+
+<input type="text" id="name" placeholder="Student Name">
+<input type="number" id="m1" placeholder="Mark 1">
+<input type="number" id="m2" placeholder="Mark 2">
+<input type="number" id="m3" placeholder="Mark 3">
+
+<button onclick="calculate()">Calculate</button>
+
+<div id="result"></div>
+
+</div>
+
+<script>
+const avg = (a,b,c)=> (a+b+c)/3;
+const total = (a,b,c)=> a+b+c;
+
+function calculate(){
+let name = document.getElementById("name").value;
+let m1 = Number(document.getElementById("m1").value);
+let m2 = Number(document.getElementById("m2").value);
+let m3 = Number(document.getElementById("m3").value);
+
+let t = total(m1,m2,m3);
+let a = avg(m1,m2,m3);
+
+document.getElementById("result").innerHTML =
+`Student Name : ${name} <br>
+ Total Marks : ${t} <br>
+ Average : ${a.toFixed(2)}`;
+}
+</script>
+
+</body>
+</html>
